@@ -2,5 +2,5 @@ FROM nginx:1.14.0
 
 RUN rm /etc/nginx/conf.d/default.conf
 RUN mkdir staticfiles
-COPY /home/djangocore/django_core/staticfiles /staticfiles/
+COPY /staticfiles /staticfiles/
 COPY nginx.conf /etc/nginx/conf.d
