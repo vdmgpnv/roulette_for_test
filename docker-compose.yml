@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+    db:
+    # Образ и версия базы, которую мы будем использовать
+        image: postgres:12.0-alpine
+    # Внешний том(volume) и место где он будет подключен внутри контейнера
+        volumes:
+                - postgres_volume:/var/lib/postgresql/data/
+        environment:
+      # Учетные данные, которые можно будет переопределить
+                - POSTGRES_USER=postgres
+                - POSTGRES_PASSWORD=postgres
+                - POSTGRES_DB=postgres
+
+    backend:
+        container_name: roulette_core
+        build: ./roulette
+        environment:
+            - WAIT_HOSTS=db:5432
+            - WAIT_HOSTS_TIMEOUT=200
+            - WAIT_SLEEP_INTERVAL=20
+            - WAIT_HOST_CONNECT_TIMEOUT=20
+        volumes:
+                - static_volume:/home/djangocore/django_core/staticfiles
+        command:
+                python3 manage.py makemigrations &&
+                python3 manage.py makemigrations *_app &&
+                python3 manage.py migrate &&
+                gunicorn django_core.wsgi:application --bind 0.0.0.0:8000"
+        expose:
+                - 8000:8000
+        depends_on:
+                - db
+
+    nginx:
+        container_name: roulette_nginx
+        build: ./nginx
+        links:
+             - "backend"
+        ports:
+            - 1996:80
+        depends_on:
+            - backend
+
+volumes:
+  postgres_volume:
+  static_volume:
