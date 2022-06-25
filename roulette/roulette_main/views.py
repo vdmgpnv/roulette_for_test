@@ -1,4 +1,4 @@
-from email import message
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import *
@@ -20,9 +20,13 @@ class RollTheRoulette(generics.CreateAPIView):
         message = 'В следующий раз повезет'
         
         user_data = request_data["user"]
-
-        current_round = Round.objects.filter(user=user_data).reverse().first()
-
+        
+        try:
+            current_round = Round.objects.filter(user=user_data).reverse().first()
+        except ObjectDoesNotExist:
+            
+            return Response(data={'Error' : 'Сначала начните раунд'})
+            
 
         if current_round.is_finished:
             new_round = Round(user=user_data)
@@ -89,7 +93,6 @@ class RoundStatistics(generics.ListAPIView):
             return value["games"]
 
         results = list(Round.objects.all().values())
-        print(results)
 
         if not results:
             return Response(data={"Error": "No data"}, status=status.HTTP_204_NO_CONTENT)
