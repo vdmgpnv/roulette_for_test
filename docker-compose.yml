@@ -6,7 +6,6 @@ services:
         volumes:
                 - postgres_volume:/var/lib/postgresql/data/
         environment:
-      # Учетные данные, которые можно будет переопределить
                 - POSTGRES_USER=postgres
                 - POSTGRES_PASSWORD=postgres
                 - POSTGRES_DB=postgres
